@@ -1,5 +1,5 @@
 import java.util.Objects;
-
+import java.util.ArrayList;
 public class Player extends Entidade {
     public Item[] playerInventory = new Item[20];
     public Player(String nome){
@@ -49,6 +49,39 @@ public class Player extends Entidade {
                 Item item = playerInventory[i];
                 if(item.getQuantidade() > 0){
                     System.out.println("(" + i + ") " + item.getNome() + ": " + item.getQuantidade());
+                }
+            }
+        }
+    }
+
+    private Item[] getDamageItems(){
+        Item[] damageItemsList = new Item[20];
+        for(int i=0; i<= playerInventory.length - 1; i++){
+            if(playerInventory[i] != null){
+                Item item = playerInventory[i];
+                if(item.getQuantidade() > 0){
+                    if(item instanceof DamageItem){
+                        for (Item damageItems : damageItemsList){
+                            if(damageItems == null){
+                                damageItems = item;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return  damageItemsList;
+    }
+
+    public void renderDamageItems(){
+        Item[] damageItems = getDamageItems();
+        System.out.println("Damage items lenght: " + damageItems.length);
+        if(damageItems.length == 0){
+            System.out.println("Sem itens de dano no inventário");
+        }else{
+            for(Item item : damageItems){
+                if(item != null){
+                    System.out.println(item.getNome());
                 }
             }
         }

@@ -1,6 +1,8 @@
 public class GameLogic {
     public String state = "start";
     private String oldState;
+
+    private Inimigo currentInimigo;
     private int poluicao = 25;
     private String playerName;
     private boolean endGame = false;
@@ -15,6 +17,12 @@ public class GameLogic {
                 showPlayerInventory();
                 break;
             }
+
+            while("player damage items".equals(state)){
+                showPlayeDamageItems();
+                break;
+            }
+
             while("show planet status".equals(state)){
                 showPlanetStatus();
                 break;
@@ -103,7 +111,26 @@ public class GameLogic {
                     state = "entering the planet";
                 }
                 if(playerChoice == 3){
-                    state = "leaving the planet";
+                    state = "encounter guard 1";
+                }
+            }
+            while("encounter guard 1".equals(state)){
+                encounterGuard1();
+                String[] choices = {"(3) Mentir", "(4) Fugir", "(5) Atacar guarda"};
+                oldState = "encounter guard 1";
+                int playerChoice = showPlayerInGameOptions(choices);
+                if(playerChoice == -1){
+                    System.out.println("Ação inválida.");
+                    state = "encounter guard 1";
+                }
+                if(playerChoice > 5 || playerChoice < 0){
+                    currentInimigo = new Inimigo("Guarda", 2);
+                    System.out.println("Ação inválida.");
+                    state = "encounter guard 1";
+                }
+                if(playerChoice == 5){
+                    state = "player damage items";
+
                 }
             }
         }while (!endGame);
@@ -155,6 +182,11 @@ public class GameLogic {
         Dialog.createDialog(texts);
     }
 
+    private void encounterGuard1(){
+        String[] texts = {"Você acaba andando alguns metros, porém, sua nave chamou muita atenção, e um guarda começa a se aproximar de você.", "-Guarda: Ei, quem é você? Você por algum acaso está envolvido nesse show todo?"};
+        Dialog.createDialog(texts);
+    }
+
 
     private void showPlanetStatus(){
         System.out.println("Status do planeta: " + this.poluicao);
@@ -163,7 +195,7 @@ public class GameLogic {
 
     private int showPlayerInGameOptions(String[] choices){
         System.out.println("Selecione uma opção");
-        System.out.println("(0) Ver status de poluição do planeta\n(1) Acessar inventário\n(2) Prosseguir");
+        System.out.println("(0) Ver status de poluição do planeta\n(1) Acessar inventário\n");
         if(choices.length > 0){
             for(String choice : choices){
                 System.out.println(choice);
@@ -182,6 +214,10 @@ public class GameLogic {
     private void showPlayerInventory(){
         Jogador.getInventory();
         state = oldState;
+    }
+
+    private void showPlayeDamageItems(){
+        Jogador.renderDamageItems();
     }
 
     private void PlayerBattleMenu(){
