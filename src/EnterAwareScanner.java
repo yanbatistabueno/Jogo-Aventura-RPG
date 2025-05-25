@@ -38,15 +38,15 @@ public class EnterAwareScanner {
      * Lê um inteiro da entrada. Se o usuário apenas apertar Enter, retorna null.
      * @return o Integer lido, ou null se foi apenas Enter ou número inválido
      */
-    public Integer nextIntOrNull() {
+    public int nextIntOrDefault(int defaultValue) {
         String line = nextLine();
         if (enterPressed) {
-            return null;
+            return defaultValue;
         }
         try {
             return Integer.parseInt(line.trim());
         } catch (NumberFormatException e) {
-            return null;
+            return defaultValue;
         }
     }
 

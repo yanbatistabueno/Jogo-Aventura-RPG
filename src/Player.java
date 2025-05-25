@@ -7,6 +7,7 @@ public class Player extends Entidade {
     }
 
     public void getItem(Item itemReceveid){
+        System.out.println("Você pegou o item: " + itemReceveid.getNome());
         if(playerInventory.length > 0){
             for(Item item : playerInventory){
                 if(item != null && Objects.equals(item.getNome(), itemReceveid.getNome())){
@@ -29,6 +30,26 @@ public class Player extends Entidade {
             if (item instanceof healItem) {
                 healItem healItem = (healItem) item;
                 this.setVida(healItem.getHealAmmount());
+            }
+        }
+    }
+
+    public void useItem(Item item, Inimigo inimigo){
+        if(item.use()){
+            if (item instanceof DamageItem) {
+                DamageItem DamageItem = (DamageItem) item;
+                inimigo.tomarDano(DamageItem.getDano());
+            }
+        }
+    }
+
+    public void getInventory(){
+        for(int i=0; i<= playerInventory.length - 1; i++){
+            if(playerInventory[i] != null){
+                Item item = playerInventory[i];
+                if(item.getQuantidade() > 0){
+                    System.out.println("(" + i + ") " + item.getNome() + ": " + item.getQuantidade());
+                }
             }
         }
     }
