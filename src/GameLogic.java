@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 public class GameLogic {
     public String state = "start";
     private String oldState;
@@ -10,6 +12,8 @@ public class GameLogic {
     EnterAwareScanner scanner = new EnterAwareScanner(System.in);
     Player Jogador = new Player("");
     healItem pocaoComum = new healItem("Poção de vida comum", "Uma poção que restaura a saúde de forma levemente eficaz", 5);
+    Item identidade = new Item("Identidade Falsa", "Uma identidade false usada em um planeta específico");
+    Item radioGuarda = new Item("Rádio do Guarda", "Um rádio de um guarda que você acabou nocauteando. Talvez usar ele dê alguma informação extra");
     public void GameLoop(){
 
         do{
@@ -19,7 +23,19 @@ public class GameLogic {
             }
 
             while("player damage items".equals(state)){
-                showPlayeDamageItems();
+                List<Item> damageItems = showPlayeDamageItems();
+                if(damageItems.isEmpty()){
+                    System.out.println("Você não tem itens de dano. Você sofrerá danos do inimigo.");
+                    System.out.println("O inimigo " + currentInimigo.getNome() + " atacou você.");
+
+                    Jogador.tomarDano(currentInimigo.getDano());
+                }else{
+                    System.out.println("Selecione um item para usar:");
+                    for(int i=0; i < damageItems.toArray().length; i++){
+
+                    }
+                }
+                state = oldState;
                 break;
             }
 
@@ -103,7 +119,7 @@ public class GameLogic {
             }
             while("entering the planet".equals(state)){
                 enteringThePlanet();
-                String[] choices = {"(3) Prosseguir"};
+                String[] choices = {"(2) Prosseguir"};
                 oldState = "entering the planet";
                 int playerChoice = showPlayerInGameOptions(choices);
                 if(playerChoice == -1){
@@ -116,22 +132,25 @@ public class GameLogic {
             }
             while("encounter guard 1".equals(state)){
                 encounterGuard1();
-                String[] choices = {"(3) Mentir", "(4) Fugir", "(5) Atacar guarda"};
+                String[] choices = {"(2) Mentir", "(3) Fugir", "(4) Atacar guarda"};
                 oldState = "encounter guard 1";
                 int playerChoice = showPlayerInGameOptions(choices);
                 if(playerChoice == -1){
                     System.out.println("Ação inválida.");
                     state = "encounter guard 1";
                 }
-                if(playerChoice > 5 || playerChoice < 0){
-                    currentInimigo = new Inimigo("Guarda", 2);
+                if(playerChoice > 4 || playerChoice < 0){
                     System.out.println("Ação inválida.");
                     state = "encounter guard 1";
                 }
-                if(playerChoice == 5){
+                if(playerChoice == 4){
                     state = "player damage items";
-
+                    oldState = "takedown guard1";
                 }
+            }
+            while("takedown guard1".equals(state)){
+                takedownGuard1();
+                Jogador.getItem(radioGuarda);
             }
         }while (!endGame);
     }
@@ -183,7 +202,13 @@ public class GameLogic {
     }
 
     private void encounterGuard1(){
+        currentInimigo = new Inimigo("Guarda", 2, 3);
         String[] texts = {"Você acaba andando alguns metros, porém, sua nave chamou muita atenção, e um guarda começa a se aproximar de você.", "-Guarda: Ei, quem é você? Você por algum acaso está envolvido nesse show todo?"};
+        Dialog.createDialog(texts);
+    }
+
+    private void takedownGuard1(){
+        String[] texts = {"Você acaba noucateando o guarda, e, em seu bolso, você encontra um rádio.", "Você decide pegar o rádio, assim conseguindo escutar quaisquer informações adicionais."};
         Dialog.createDialog(texts);
     }
 
@@ -195,7 +220,7 @@ public class GameLogic {
 
     private int showPlayerInGameOptions(String[] choices){
         System.out.println("Selecione uma opção");
-        System.out.println("(0) Ver status de poluição do planeta\n(1) Acessar inventário\n");
+        System.out.println("(0) Ver status de poluição do planeta\n(1) Acessar inventário");
         if(choices.length > 0){
             for(String choice : choices){
                 System.out.println(choice);
@@ -216,8 +241,8 @@ public class GameLogic {
         state = oldState;
     }
 
-    private void showPlayeDamageItems(){
-        Jogador.renderDamageItems();
+    private List<Item> showPlayeDamageItems(){
+        return Jogador.getDamageItems();
     }
 
     private void PlayerBattleMenu(){
