@@ -1,7 +1,22 @@
+import java.util.ArrayList;
+import java.util.List;
 public abstract class Entidade {
     private int vida;
     private int maxVida;
+
+    private int forca;
+
+    private int inteli;
+
+    private int stamina;
+
+    private int vel;
+
+    private List<Attack> attacksList;
+
     private String nome;
+
+
 
     public Entidade(String nome, int maxVida){
         this.nome = nome;
@@ -14,6 +29,10 @@ public abstract class Entidade {
     }
     public int getVida(){
         return this.vida;
+    }
+
+    public int getVel(){
+        return this.vel;
     }
     public void setNome(String nome){
         this.nome = nome;
@@ -36,6 +55,16 @@ public abstract class Entidade {
         }else{
             System.out.println("Vida de " + getNome() + ": " + this.vida);
         }
+    }
+
+    public void setAttacks(Attack[] attacks){
+        for (Attack attack : attacks){
+            attacksList.add(attack);
+        }
+    }
+
+    public void setAttacks(Attack attack){
+        attacksList.add(attack);
     }
 
     public abstract void morrer();

@@ -23,20 +23,20 @@ public class GameLogic {
             }
 
             while("player damage items".equals(state)){
-                List<Item> damageItems = showPlayeDamageItems();
-                if(damageItems.isEmpty()){
-                    System.out.println("Você não tem itens de dano. Você sofrerá danos do inimigo.");
-                    System.out.println("O inimigo " + currentInimigo.getNome() + " atacou você.");
-
-                    Jogador.tomarDano(currentInimigo.getDano());
-                }else{
-                    System.out.println("Selecione um item para usar:");
-                    for(int i=0; i < damageItems.toArray().length; i++){
-
-                    }
-                }
-                state = oldState;
-                break;
+//                List<Item> damageItems = showPlayeDamageItems();
+//                if(damageItems.isEmpty()){
+//                    System.out.println("Você não tem itens de dano. Você sofrerá danos do inimigo.");
+//                    System.out.println("O inimigo " + currentInimigo.getNome() + " atacou você.");
+//
+//                    Jogador.tomarDano(currentInimigo.getDano());
+//                }else{
+//                    System.out.println("Selecione um item para usar:");
+//                    for(int i=0; i < damageItems.toArray().length; i++){
+//
+//                    }
+//                }
+//                state = oldState;
+//                break;
             }
 
             while("show planet status".equals(state)){
@@ -147,10 +147,17 @@ public class GameLogic {
                     state = "player damage items";
                     oldState = "takedown guard1";
                 }
+                if(playerChoice == 2){
+                    state = "player lie guard1";
+                }
             }
             while("takedown guard1".equals(state)){
                 takedownGuard1();
                 Jogador.getItem(radioGuarda);
+            }
+            while("player lie guard1".equals(state)){
+                oldState = "takedown guard1";
+                playerLieGuard1();
             }
         }while (!endGame);
     }
@@ -212,6 +219,18 @@ public class GameLogic {
         Dialog.createDialog(texts);
     }
 
+    private void playerLieGuard1(){
+        String playerLie = Jogador.getNome() + ": Não estou envolvido em nada, senhor. Sou apenas um cidadão comum de passagem.";
+        String[] texts = {playerLie,"Guarda: Ah é mesmo? Me deixe ver sua identidade então, cidadão."};
+        Dialog.createDialog(texts);
+        if(!Jogador.getBoolItemByName("Identidade Falsa")){
+            playerLie = Jogador.getNome() + ": Ah... então ,eu não tenho isso.";
+            String[] texts2 = {playerLie, "Guarda: Você está mentindo então. Todo cidadão desse planeta precisa andar com sua documentação. Irei imobilizar você!"};
+            Dialog.createDialog(texts2);
+            state = "player damage items";
+        }
+    }
+
 
     private void showPlanetStatus(){
         System.out.println("Status do planeta: " + this.poluicao);
@@ -249,10 +268,31 @@ public class GameLogic {
         
     }
 
-    private void BattleLoop(Player player, Inimigo inimigo){
-        int turno;
+    public void BattleLoop(Player player, Inimigo inimigo){
+        boolean battleEnded = false;
+        Entidade[] priorityList = new Entidade[2];
+        int turno = 0;
+        if(player.getVel() > inimigo.getVel()){
+            priorityList[0] = player;
+            priorityList[1] = inimigo;
+        }
+        if(player.getVel() < inimigo.getVel()){
+            priorityList[0] = inimigo;
+            priorityList[1] = player;
+        }
         do{
+            Entidade currentEntidade = priorityList[turno % 2];
+            System.out.println(currentEntidade.getNome());
+            turno++;
+            if(Jogador.getVida() == 0){
+                System.out.println("Você morreu.");
+                battleEnded = true;
 
-        }while(player.getVida() > 0 && inimigo.getVida() > 0);
+            }
+            if(inimigo.getVida() == 0){
+                System.out.println("Você derrotou " + inimigo.getNome());
+            }
+
+        }while(!battleEnded);
     }
 }

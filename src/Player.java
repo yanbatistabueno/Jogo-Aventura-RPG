@@ -64,18 +64,14 @@ public class Player extends Entidade {
         return damageItemsList;
     }
 
-
-//    public void renderDamageItems() {
-//        List<Item> damageItems = getDamageItems();
-//        if (damageItems.isEmpty()) {
-//            System.out.println("Sem itens de dano no inventário");
-//        } else {
-//            System.out.println("Damage items length: " + damageItems.size());
-//            for (Item item : damageItems) {
-//                System.out.println(item.getNome());
-//            }
-//        }
-//    }
+    public boolean getBoolItemByName(String itemName){
+        for (Item item : playerInventory){
+            if(item.getNome().equals(itemName)){
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void morrer() {
