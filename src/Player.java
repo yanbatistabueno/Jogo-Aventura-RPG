@@ -1,41 +1,80 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Player extends Entidade {
-    public Item[] playerInventory = new Item[20];
-    public Player(String nome){
+    private List<Item> playerInventory = new ArrayList<>();
+
+    public Player(String nome) {
         super(nome, 10);
     }
 
-    public void getItem(Item itemReceveid){
-        if(playerInventory.length > 0){
-            for(Item item : playerInventory){
-                if(item != null && Objects.equals(item.getNome(), itemReceveid.getNome())){
-                    item.setQuantitade(item.getQuantidade() + 1);
-                    return;
-                }
+    public void getItem(Item itemReceived) {
+        System.out.println("Você pegou o item: " + itemReceived.getNome());
+
+        // Verifica se já existe no inventário
+        for (Item item : playerInventory) {
+            if (Objects.equals(item.getNome(), itemReceived.getNome())) {
+                item.setQuantitade(item.getQuantidade() + 1);
+                return;
             }
         }
-        for (int i = 0; i < playerInventory.length; i++) {
-            if (playerInventory[i] == null) {
-                playerInventory[i] = itemReceveid;
-                break;
-            }
-        }
-//        playerInventory[0] = itemReceveid;
+
+        // Se não existe, adiciona ao inventário
+        playerInventory.add(itemReceived);
     }
 
-    public void useItem(Item item){
-        if(item.use()){
+    /**
+     * Usa um item de cura se for instancia de HealItem
+     */
+    public void useItem(Item item) {
+        if (item.use()) {
             if (item instanceof healItem) {
-                healItem healItem = (healItem) item;
-                this.setVida(healItem.getHealAmmount());
+                healItem heal = (healItem) item;
+                this.setVida(heal.getHealAmmount());
             }
         }
+    }
+
+    public void useItem(Item item, Inimigo inimigo) {
+        if (item.use()) {
+            if (item instanceof DamageItem) {
+                DamageItem dmg = (DamageItem) item;
+                inimigo.tomarDano(dmg.getDano());
+            }
+        }
+    }
+
+    public void getInventory() {
+        for (int i = 0; i < playerInventory.size(); i++) {
+            Item item = playerInventory.get(i);
+            if (item.getQuantidade() > 0) {
+                System.out.println("(" + i + ") " + item.getNome() + ": " + item.getQuantidade());
+            }
+        }
+    }
+
+    public List<Item> getDamageItems() {
+        List<Item> damageItemsList = new ArrayList<>();
+        for (Item item : playerInventory) {
+            if (item.getQuantidade() > 0 && item instanceof DamageItem) {
+                damageItemsList.add(item);
+            }
+        }
+        return damageItemsList;
+    }
+
+    public boolean getBoolItemByName(String itemName){
+        for (Item item : playerInventory){
+            if(item.getNome().equals(itemName)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
-    public void morrer(){
+    public void morrer() {
         System.out.println("Você morreu.");
-        System.out.println("Deseja continuar?");
     }
 }

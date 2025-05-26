@@ -16,6 +16,7 @@ public class GameDialog {
 
                 }else{
                     currentDialogIndex = 0;
+//                    scanner.close();
                     ended = true;
                 }
 
