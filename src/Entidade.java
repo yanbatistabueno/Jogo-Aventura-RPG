@@ -86,7 +86,6 @@ public abstract class Entidade {
         System.out.println(entidade.getNome() + " usou " + attack.getNome());
         alvo.tomarDano(dano);
     }
-
     public List<Attack> getAttacksList() {
         return attacksList;
     }

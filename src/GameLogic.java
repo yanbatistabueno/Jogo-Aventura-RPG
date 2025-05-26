@@ -12,7 +12,7 @@ public class GameLogic {
     private boolean endGame = false;
     GameDialog Dialog = new GameDialog();
     EnterAwareScanner scanner = new EnterAwareScanner(System.in);
-    Player Jogador;
+    Player Jogador = null;
     healItem pocaoComum = new healItem("Poção de vida comum", "Uma poção que restaura a saúde de forma levemente eficaz", 5);
     UsableItem identidade = new UsableItem("Identidade Falsa", "Uma identidade false usada em um planeta específico");
     UsableItem radioGuarda = new UsableItem("Rádio do Guarda", "Um rádio de um guarda que você acabou nocauteando. Talvez usar ele dê alguma informação extra");
@@ -25,20 +25,7 @@ public class GameLogic {
             }
 
             while("player damage items".equals(state)){
-//                List<Item> damageItems = showPlayeDamageItems();
-//                if(damageItems.isEmpty()){
-//                    System.out.println("Você não tem itens de dano. Você sofrerá danos do inimigo.");
-//                    System.out.println("O inimigo " + currentInimigo.getNome() + " atacou você.");
-//
-//                    Jogador.tomarDano(currentInimigo.getDano());
-//                }else{
-//                    System.out.println("Selecione um item para usar:");
-//                    for(int i=0; i < damageItems.toArray().length; i++){
-//
-//                    }
-//                }
-//                state = oldState;
-//                break;
+
             }
 
             while("show planet status".equals(state)){
@@ -86,8 +73,7 @@ public class GameLogic {
                     state = "player introduction";
                 }
                 if(choice == 0){
-//                    Jogador.setNome(playerName);
-                    state = "player greetings";
+                    state = "player choose stats";
                 }
             }
 
@@ -134,7 +120,7 @@ public class GameLogic {
                     playerAgil = 5;
                     playerMaxVida = 12;
                 }
-                Player jogador = new Player(playerName, playerMaxVida, playerForca, playerIntel, playerAgil);
+                Jogador = new Player(playerName, playerMaxVida, playerForca, playerIntel, playerAgil);
                 state = "player greetings";
                 break;
             }
@@ -177,7 +163,7 @@ public class GameLogic {
                     System.out.println("Ação inválida.");
                     state = "entering the planet";
                 }
-                if(playerChoice == 3){
+                if(playerChoice == 2){
                     state = "encounter guard 1";
                 }
             }
@@ -196,7 +182,12 @@ public class GameLogic {
                 }
                 if(playerChoice == 4){
                     BattleLoop(Jogador, currentInimigo);
-                    oldState = "takedown guard1";
+                    if(endGame){
+                        state = "";
+                    }else{
+                        oldState = "takedown guard1";
+                        state = "takedown guard1";
+                    }
                 }
                 if(playerChoice == 2){
                     state = "player lie guard1";
@@ -265,7 +256,7 @@ public class GameLogic {
     }
 
     private void encounterGuard1(){
-        currentInimigo = new Inimigo("Guarda", 2, 3, 2, 2);
+        currentInimigo = new Inimigo("Guarda", 10, 3, 2, 2);
         String[] texts = {"Você acaba andando alguns metros, porém, sua nave chamou muita atenção, e um guarda começa a se aproximar de você.", "-Guarda: Ei, quem é você? Você por algum acaso está envolvido nesse show todo?"};
         Dialog.createDialog(texts);
     }
@@ -316,9 +307,6 @@ public class GameLogic {
         state = oldState;
     }
 
-    private List<Item> showPlayeDamageItems(){
-        return Jogador.getDamageItems();
-    }
 
     private void PlayerBattleMenu(Player player, Inimigo inimigo){
         boolean action = false;
@@ -342,11 +330,46 @@ public class GameLogic {
                     System.out.println("Ataque inválido.");
                 }else{
                     Attack currentAttack = atackList.get(attackInput);
-//                    System.out.println("Você usou o ataque: " + currentAttack.getNome());
                     player.useAttack(player, inimigo, currentAttack);
                     action = true; //Para o loop
                 }
 
+            }
+            if(input == 1){
+                List<Item> jogadorInventory = Jogador.getInventory();
+                if(jogadorInventory.toArray().length > 0){
+                    System.out.println("Selecione um item");
+                    int itemIndex = 0;
+                    for (Item item : jogadorInventory){
+                        if((item instanceof Weapon)){ //Remove armas
+                            jogadorInventory.remove(item);
+                        }
+
+                        if(!(item instanceof UsableItem)){ //Remove items que não seu utilizáveis
+                            jogadorInventory.remove(item);
+                        }else{
+                            UsableItem displayUsable = (UsableItem) item;
+                            System.out.println(itemIndex + ": " + displayUsable.getNome() +  " x " + displayUsable.getQuantidade());
+                            itemIndex ++;
+                        }
+
+                    }
+                    int itemInput = scanner.nextIntOrDefault(-1);
+                    if(itemInput == -1 && (itemInput < 0 && itemInput > itemIndex)){ //Verifica se o usuário pegou um ataque
+                        System.out.println("Item inválido.");
+                    }else{
+                        Item currentItem = jogadorInventory.get(itemInput);
+                        UsableItem usable = (UsableItem) currentItem;
+                        if(currentItem instanceof DamageItem){
+                            player.useItem(usable, inimigo);
+                        }else{
+                            player.useItem(usable);
+                        }
+                        action = true; //Para o loop
+                    }
+                }else{
+                    System.out.println("Você não tem items.");
+                }
             }
         }while(!action);
     }
@@ -363,14 +386,21 @@ public class GameLogic {
             priorityList[0] = inimigo;
             priorityList[1] = player;
         }
+        System.out.println("Você iniciou um duelo com: " + inimigo.getNome());
         do{
             Entidade currentEntidade = priorityList[turno % 2];
-            System.out.println(currentEntidade.getNome() + " " +  inimigo.getVida());
-            PlayerBattleMenu(player, inimigo);
+            System.out.println("Turno de: " + currentEntidade.getNome());
+            if(currentEntidade.getNome().equals(player.getNome())){
+                PlayerBattleMenu(player, inimigo);
+            }else{
+                inimigo.useAttack(inimigo, player, inimigo.getAttacksList().get(0));
+            }
+
             turno++;
             if(player.getVida() <= 0){
-                System.out.println("Você morreu.");
+                System.out.println("Sua missão falhou.");
                 battleEnded = true;
+                endGame = true;
 
             }
             if(inimigo.getVida() <= 0){

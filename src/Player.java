@@ -59,28 +59,8 @@ public class Player extends Entidade {
     }
 
 
-    public void getInventory() {
-        for (int i = 0; i < playerInventory.size(); i++) {
-            Item item = playerInventory.get(i);
-        }
-    }
-
-    public List<Item> getDamageItems() {
-        List<Item> damageItemsList = new ArrayList<>();
-        for (Item item : playerInventory) {
-            if(item instanceof DamageItem){ //Se for um item usável que causa dano e ele tiver uma quantia maior que 0, ele vai aparecer na lista
-                DamageItem damageItem = (DamageItem) item;
-                if (damageItem.getQuantidade() > 0) {
-                    damageItemsList.add(damageItem);
-                }
-            }
-            if(item instanceof Weapon){
-                Weapon weapon = (Weapon) item;
-                damageItemsList.add(weapon);
-            }
-
-        }
-        return damageItemsList;
+    public List<Item> getInventory() {
+        return this.playerInventory;
     }
 
     public boolean getBoolItemByName(String itemName){
