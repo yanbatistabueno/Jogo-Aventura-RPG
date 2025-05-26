@@ -1,19 +1,21 @@
-import java.util.ArrayList;
 import java.util.List;
 public class GameLogic {
     public String state = "start";
     private String oldState;
-
+    private int playerIntel;
+    private int playerForca;
+    private int playerAgil;
+    private int playerMaxVida;
     private Inimigo currentInimigo;
     private int poluicao = 25;
     private String playerName;
     private boolean endGame = false;
     GameDialog Dialog = new GameDialog();
     EnterAwareScanner scanner = new EnterAwareScanner(System.in);
-    Player Jogador = new Player("");
+    Player Jogador;
     healItem pocaoComum = new healItem("Poção de vida comum", "Uma poção que restaura a saúde de forma levemente eficaz", 5);
-    Item identidade = new Item("Identidade Falsa", "Uma identidade false usada em um planeta específico");
-    Item radioGuarda = new Item("Rádio do Guarda", "Um rádio de um guarda que você acabou nocauteando. Talvez usar ele dê alguma informação extra");
+    UsableItem identidade = new UsableItem("Identidade Falsa", "Uma identidade false usada em um planeta específico");
+    UsableItem radioGuarda = new UsableItem("Rádio do Guarda", "Um rádio de um guarda que você acabou nocauteando. Talvez usar ele dê alguma informação extra");
     public void GameLoop(){
 
         do{
@@ -84,10 +86,59 @@ public class GameLogic {
                     state = "player introduction";
                 }
                 if(choice == 0){
-                    Jogador.setNome(playerName);
+//                    Jogador.setNome(playerName);
                     state = "player greetings";
                 }
             }
+
+            while ("player choose stats".equals(state)){
+                PlayerChooseStats();
+                System.out.println("(0)Inteligente: mais pontos de inteligência");
+                System.out.println("(1)Forte: mais pontos de força");
+                System.out.println("(2)Ágil: mais pontos de agilidade");
+                System.out.println("(3)Resistente: mais pontos de vida");
+                System.out.println("(4)Um pouco de tudo: pontos equilibrados");
+                int input = scanner.nextIntOrDefault(-1);
+                if(input == -1 || (input < 0 && input > 4)){
+                    System.out.println("Ação inválida");
+                    state = "player choose stats";
+                    break;
+                }
+                if(input == 0){
+                    playerIntel = 8;
+                    playerForca = 3;
+                    playerAgil = 3;
+                    playerMaxVida = 10;
+                }
+                if(input == 1){
+                    playerIntel = 3;
+                    playerForca = 8;
+                    playerAgil = 3;
+                    playerMaxVida = 10;
+                }
+                if(input == 2){
+                    playerIntel = 3;
+                    playerForca = 3;
+                    playerAgil = 8;
+                    playerMaxVida = 10;
+                }
+                if(input == 3){
+                    playerIntel = 4;
+                    playerForca = 4;
+                    playerAgil = 4;
+                    playerMaxVida = 16;
+                }
+                if(input == 4){
+                    playerIntel = 5;
+                    playerForca = 5;
+                    playerAgil = 5;
+                    playerMaxVida = 12;
+                }
+                Player jogador = new Player(playerName, playerMaxVida, playerForca, playerIntel, playerAgil);
+                state = "player greetings";
+                break;
+            }
+
             while("player greetings".equals(state)){
                 PlayerGreetings();
                 state = "before leaving";
@@ -144,7 +195,7 @@ public class GameLogic {
                     state = "encounter guard 1";
                 }
                 if(playerChoice == 4){
-                    state = "player damage items";
+                    BattleLoop(Jogador, currentInimigo);
                     oldState = "takedown guard1";
                 }
                 if(playerChoice == 2){
@@ -181,6 +232,11 @@ public class GameLogic {
         Dialog.createDialog(texts);
     }
 
+    private void PlayerChooseStats(){
+        String[] texts = {"Como você se considera como pesoa?", "Inteligente, forte, ágil, resistente ou um pouco de cada?"};
+        Dialog.createDialog(texts);
+    }
+
     private void PlayerGreetings(){
         String playerGreet = "Bem vindo " + Jogador.getNome();
         String[] texts = {playerGreet, "Você agora é o mais novo membro dos Guardiões Verdes.", "Sua primeira missão é averiguar a situação do planeta Viridya.", "Aparentemente há um surto letal de poluição lá.", "Sua missão é descobrir a causa dessa contaminação em massa e acabar com o problema.", "Falhar não é uma opção."};
@@ -209,7 +265,7 @@ public class GameLogic {
     }
 
     private void encounterGuard1(){
-        currentInimigo = new Inimigo("Guarda", 2, 3);
+        currentInimigo = new Inimigo("Guarda", 2, 3, 2, 2);
         String[] texts = {"Você acaba andando alguns metros, porém, sua nave chamou muita atenção, e um guarda começa a se aproximar de você.", "-Guarda: Ei, quem é você? Você por algum acaso está envolvido nesse show todo?"};
         Dialog.createDialog(texts);
     }
@@ -264,33 +320,62 @@ public class GameLogic {
         return Jogador.getDamageItems();
     }
 
-    private void PlayerBattleMenu(){
-        
+    private void PlayerBattleMenu(Player player, Inimigo inimigo){
+        boolean action = false;
+        do{
+            System.out.println("Selecione as opções");
+            System.out.println("(0)Atacar\n(1)Ver iventário");
+            int input = scanner.nextIntOrDefault(-1);
+            if(input == -1 || (input < 0 && input > 1)){
+                System.out.println("Ação inválida");
+            }
+            if(input == 0){
+                System.out.println("Selecione um ataque");
+                List<Attack> atackList = player.getAttacksList();
+                int attackIndex = 0;
+                for (Attack attack : atackList){
+                    System.out.println(attackIndex + ": " + attack.getNome() + " - " + ((attack.getDano() + player.getForca()) / 2) + " de dano.");
+
+                }
+                int attackInput = scanner.nextIntOrDefault(-1);
+                if(attackInput == -1 && (attackInput < 0 && attackInput > attackIndex)){ //Verifica se o usuário pegou um ataque
+                    System.out.println("Ataque inválido.");
+                }else{
+                    Attack currentAttack = atackList.get(attackInput);
+//                    System.out.println("Você usou o ataque: " + currentAttack.getNome());
+                    player.useAttack(player, inimigo, currentAttack);
+                    action = true; //Para o loop
+                }
+
+            }
+        }while(!action);
     }
 
     public void BattleLoop(Player player, Inimigo inimigo){
         boolean battleEnded = false;
         Entidade[] priorityList = new Entidade[2];
         int turno = 0;
-        if(player.getVel() > inimigo.getVel()){
+        if(player.getAgi() > inimigo.getAgi()){
             priorityList[0] = player;
             priorityList[1] = inimigo;
         }
-        if(player.getVel() < inimigo.getVel()){
+        if(player.getAgi() < inimigo.getAgi()){
             priorityList[0] = inimigo;
             priorityList[1] = player;
         }
         do{
             Entidade currentEntidade = priorityList[turno % 2];
-            System.out.println(currentEntidade.getNome());
+            System.out.println(currentEntidade.getNome() + " " +  inimigo.getVida());
+            PlayerBattleMenu(player, inimigo);
             turno++;
-            if(Jogador.getVida() == 0){
+            if(player.getVida() <= 0){
                 System.out.println("Você morreu.");
                 battleEnded = true;
 
             }
-            if(inimigo.getVida() == 0){
+            if(inimigo.getVida() <= 0){
                 System.out.println("Você derrotou " + inimigo.getNome());
+                battleEnded = true;
             }
 
         }while(!battleEnded);

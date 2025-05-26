@@ -1,4 +1,4 @@
-public class DamageItem extends Item {
+public class DamageItem extends UsableItem {
     private int dano;
     public DamageItem(String nome, String desc, int dano){
         super(nome, desc);

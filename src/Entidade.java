@@ -4,24 +4,33 @@ public abstract class Entidade {
     private int vida;
     private int maxVida;
 
+
     private int forca;
 
     private int inteli;
 
     private int stamina;
 
-    private int vel;
+    private int agi;
 
-    private List<Attack> attacksList;
+    Attack soco = new Attack("Soco", 1);
+
+    private List<Attack> attacksList = new ArrayList<>();
 
     private String nome;
 
 
 
-    public Entidade(String nome, int maxVida){
+
+
+    public Entidade(String nome, int maxVida, int forca, int inteli, int agi){
         this.nome = nome;
         this.maxVida = maxVida;
         this.vida = maxVida;
+        this.forca = forca;
+        this.inteli = inteli;
+        this.agi = agi;
+        attacksList.add(soco);
     }
 
     public String getNome(){
@@ -31,9 +40,14 @@ public abstract class Entidade {
         return this.vida;
     }
 
-    public int getVel(){
-        return this.vel;
+    public int getAgi(){
+        return this.agi;
     }
+
+    public int getForca(){
+        return this.forca;
+    }
+
     public void setNome(String nome){
         this.nome = nome;
     }
@@ -65,6 +79,16 @@ public abstract class Entidade {
 
     public void setAttacks(Attack attack){
         attacksList.add(attack);
+    }
+
+    public void useAttack(Entidade entidade, Entidade alvo, Attack attack){
+        int dano = (attack.getDano() + entidade.getForca()) / 2;
+        System.out.println(entidade.getNome() + " usou " + attack.getNome());
+        alvo.tomarDano(dano);
+    }
+
+    public List<Attack> getAttacksList() {
+        return attacksList;
     }
 
     public abstract void morrer();

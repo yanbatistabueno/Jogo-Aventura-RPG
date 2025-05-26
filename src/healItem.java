@@ -1,4 +1,4 @@
-public class healItem extends Item{
+public class healItem extends UsableItem {
     private int healAmmount;
     public healItem(String itemNome, String itemDesc, int healAmmount){
         super(itemNome, itemDesc);

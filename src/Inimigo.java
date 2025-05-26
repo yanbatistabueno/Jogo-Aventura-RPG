@@ -1,8 +1,7 @@
 public class Inimigo extends Entidade{
     private int dano;
-    public Inimigo(String nome, int vida, int dano){
-        super(nome, vida);
-        this.dano = dano;
+    public Inimigo(String nome, int vida, int forca, int inteli, int agi){
+        super(nome, vida, forca, inteli, agi);
     }
 
     public int getDano(){
