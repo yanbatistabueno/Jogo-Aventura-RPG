@@ -1,7 +1,12 @@
-public class Weapon extends Item {
-    private int dano;
-    public Weapon(String nome, String desc, int dano){
-        super(nome, desc);
-        this.dano = dano;
+public class Weapon extends DamageItem {
+    private Attack ataqueDaArma;
+    public Weapon(String nome, String desc, int dano, Attack ataque){ //-(Método Construtor)
+        super(nome, desc, dano);
+        this.ataqueDaArma = ataque;
     }
+
+    public Attack getAtaqueDaArma(){
+        return this.ataqueDaArma;
+    }
+
 }

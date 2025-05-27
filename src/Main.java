@@ -3,7 +3,6 @@ public class Main {
 
         GameLogic Game = new GameLogic();
         Game.GameLoop();
-//        Game.BattleLoop(jogador, inimigo);
 
 
     }

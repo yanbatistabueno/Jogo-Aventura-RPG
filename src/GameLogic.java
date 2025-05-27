@@ -15,7 +15,7 @@ public class GameLogic {
     Player Jogador = null;
     healItem pocaoComum = new healItem("Poção de vida comum", "Uma poção que restaura a saúde de forma levemente eficaz", 5);
     UsableItem identidade = new UsableItem("Identidade Falsa", "Uma identidade false usada em um planeta específico");
-    UsableItem radioGuarda = new UsableItem("Rádio do Guarda", "Um rádio de um guarda que você acabou nocauteando. Talvez usar ele dê alguma informação extra");
+    Item radioGuarda = new Item("Rádio do Guarda", "Um rádio de um guarda que você acabou nocauteando. Talvez usar ele dê alguma informação extra");
     public void GameLoop(){
 
         do{
@@ -42,14 +42,12 @@ public class GameLogic {
                     state = "start";
                     break;
                 }
-                if(input == 3){
+                if(input == 1){
                     System.out.println("Saindo do jogo...");
+                    state = "";
                     endGame = true;
                 }
-                if(input == 2){
-                    state = "creditos";
-                }
-                if(input == 1){
+                if(input == 0){
                     state = "introduction";
                 }
             }
@@ -156,31 +154,37 @@ public class GameLogic {
             }
             while("entering the planet".equals(state)){
                 enteringThePlanet();
-                String[] choices = {"(2) Prosseguir"};
+                String[] choices = {"(1) Prosseguir"};
                 oldState = "entering the planet";
                 int playerChoice = showPlayerInGameOptions(choices);
                 if(playerChoice == -1){
                     System.out.println("Ação inválida.");
                     state = "entering the planet";
                 }
-                if(playerChoice == 2){
+                if(playerChoice == 1){
                     state = "encounter guard 1";
                 }
             }
+            while("escape from guard".equals(state)){
+                System.out.println("Você fugiu e o planeta chegou ao ponto crítico. Sua missão fracassou.");
+                endGame = true;
+                state = "";
+                break;
+            }
             while("encounter guard 1".equals(state)){
                 encounterGuard1();
-                String[] choices = {"(2) Mentir", "(3) Fugir", "(4) Atacar guarda"};
+                String[] choices = {"(1) Mentir", "(2) Fugir", "(3) Atacar guarda"};
                 oldState = "encounter guard 1";
                 int playerChoice = showPlayerInGameOptions(choices);
                 if(playerChoice == -1){
                     System.out.println("Ação inválida.");
                     state = "encounter guard 1";
                 }
-                if(playerChoice > 4 || playerChoice < 0){
+                if(playerChoice > 3 || playerChoice < 0){
                     System.out.println("Ação inválida.");
                     state = "encounter guard 1";
                 }
-                if(playerChoice == 4){
+                if(playerChoice == 3){
                     BattleLoop(Jogador, currentInimigo);
                     if(endGame){
                         state = "";
@@ -189,23 +193,94 @@ public class GameLogic {
                         state = "takedown guard1";
                     }
                 }
-                if(playerChoice == 2){
+                if(playerChoice == 1){
                     state = "player lie guard1";
+                }
+                if(playerChoice == 2){
+                    state = "escape from guard";
                 }
             }
             while("takedown guard1".equals(state)){
                 takedownGuard1();
                 Jogador.getItem(radioGuarda);
+                Attack ataqueArma = new Attack("Golpe da arma", 20);
+                Weapon ArmaGuarda = new Weapon("Arma", "Arma do guarda", 4, ataqueArma);
+                Jogador.getItem(ArmaGuarda);
+                boolean acao = false;
+                while(!acao){
+                    System.out.println("Deseja equipar a arma do guarda?\n(0)Sim\n(1)Não");
+                    int armachoose = scanner.nextIntOrDefault(-1);
+                    if(armachoose == -1 || (armachoose < 0 && armachoose > 1)){
+                        System.out.println("Ação inválida");
+                    }
+                    if(armachoose == 0){
+                        Jogador.equipWeapon(ArmaGuarda);
+                        acao = true;
+                        state = "final1";
+                    }
+
+                    if(armachoose == 1){
+                        acao = true;
+                        state = "final1";
+                    }
+                }
+                state = "final1";
             }
             while("player lie guard1".equals(state)){
                 oldState = "takedown guard1";
                 playerLieGuard1();
             }
+            while("final1".equals(state)){
+                FinalPart1();
+                System.out.println("(0)Concordar\n(1)Lutar\n(2)Fugir");
+                boolean choice = false;
+                while(!choice){
+                    int finalChoice = scanner.nextIntOrDefault(-1);
+                    if(finalChoice == -1 || (finalChoice < 0 && finalChoice > 2)){
+                        System.out.println("Ação inválida");
+                    }
+                    if(finalChoice == 0){
+                        state = "final concordar";
+                        choice = true;
+                    }
+                    if(finalChoice == 1){
+                        currentInimigo = new Inimigo("Leon", 5, 5, 10, 5);
+                        BattleLoop(Jogador, currentInimigo);
+                        if(endGame){
+                            state = "";
+                        }else{
+                            oldState = "finalfeliz";
+                            state = "finalfeliz";
+                        }
+                        break;
+                    }
+                    if(finalChoice == 0){
+                        System.out.println("Você se juntou ao presidente Leon. Agora, toda a galáxia sofrerá da poluição em masse.");
+                        endGame = true;
+                        state = "";
+                        break;
+                    }
+                }
+
+
+            }
+            while("finalfeliz".equals(state)){
+                System.out.println("Você acabou com a tirania do Presidente Leon." + "Parabéns: " + Jogador.getNome() +  ", por ter vencido o jogo!");
+                state = "";
+                endGame = true;
+                break;
+            }
+            while("final misterioso".equals(state)){
+                System.out.println("Você despista o guarda, mas o planeta é tão vasto que você acaba se perdendo.\nCom isso o planeta caba entrando em criticalidade, e sua missão fracassa.");
+                state = "";
+                endGame = true;
+                break;
+            }
         }while (!endGame);
     }
 
     private void StartMenu(){
-        String[] texts = {"Bem vindo ao Chinforinfola", "Selecione uma das opções abaixo: ", "(1)Jogar\n(2)Créditos\n(3)Sair do jogo"};
+        String[] texts = {"Bem vindo ao Chinforinfola", "Selecione uma das opções abaixo: ", "(0)Jogar\n(1)Sair do jogo"};
         Dialog.createDialog(texts);
     }
     private void ShowCredits(){
@@ -256,13 +331,19 @@ public class GameLogic {
     }
 
     private void encounterGuard1(){
-        currentInimigo = new Inimigo("Guarda", 10, 3, 2, 2);
+        currentInimigo = new Inimigo("Guarda", 10, 3, 6, 2);
         String[] texts = {"Você acaba andando alguns metros, porém, sua nave chamou muita atenção, e um guarda começa a se aproximar de você.", "-Guarda: Ei, quem é você? Você por algum acaso está envolvido nesse show todo?"};
         Dialog.createDialog(texts);
     }
 
     private void takedownGuard1(){
-        String[] texts = {"Você acaba noucateando o guarda, e, em seu bolso, você encontra um rádio.", "Você decide pegar o rádio, assim conseguindo escutar quaisquer informações adicionais."};
+        String[] texts = {"Você acaba noucateando o guarda, e, em seu bolso, você encontra um rádio.", "Você decide pegar o rádio, assim conseguindo escutar quaisquer informações adicionais.", "Vasculhando também você acha a arma dele."};
+        Dialog.createDialog(texts);
+    }
+
+    private void FinalPart1(){
+        String[] texts = {"Você usa o rádio do Guarda e descobre a localização da raíz da poluição do planeta.", "Você chega nas coordenadas e vê um homem de terno em meio a muitos resíduos de radiação.", "O homem se revela ser Leon, o presidente do planeta.", "Leon: Pense, pense jovem guerreiro, em quanto nós podemos conseguir se juntarmos nossas forças.", "Leon: Junte-se a mim, e dominaremos essa sistema inteiro com a minha invenção de poluição!"};
+
         Dialog.createDialog(texts);
     }
 
@@ -270,12 +351,24 @@ public class GameLogic {
         String playerLie = Jogador.getNome() + ": Não estou envolvido em nada, senhor. Sou apenas um cidadão comum de passagem.";
         String[] texts = {playerLie,"Guarda: Ah é mesmo? Me deixe ver sua identidade então, cidadão."};
         Dialog.createDialog(texts);
-        if(!Jogador.getBoolItemByName("Identidade Falsa")){
+        if(!(Jogador.getInteli() > currentInimigo.getInteli())){
             playerLie = Jogador.getNome() + ": Ah... então ,eu não tenho isso.";
             String[] texts2 = {playerLie, "Guarda: Você está mentindo então. Todo cidadão desse planeta precisa andar com sua documentação. Irei imobilizar você!"};
             Dialog.createDialog(texts2);
-            state = "player damage items";
+            BattleLoop(Jogador, currentInimigo);
+            if(endGame){
+                state = "";
+            }else{
+                oldState = "takedown guard1";
+                state = "takedown guard1";
+            }
+        }else{
+            playerLie = Jogador.getNome() + ": " + "sou parente do presidente. Não vai mesmo deixar eu passar?";
+            String[] texts2 = {playerLie, "Guarda: Sinto muito, pode passar..."};
+            Dialog.createDialog(texts2);
+            state = "final misterioso";
         }
+
     }
 
 
@@ -286,7 +379,7 @@ public class GameLogic {
 
     private int showPlayerInGameOptions(String[] choices){
         System.out.println("Selecione uma opção");
-        System.out.println("(0) Ver status de poluição do planeta\n(1) Acessar inventário");
+        System.out.println("(0) Acessar inventário");
         if(choices.length > 0){
             for(String choice : choices){
                 System.out.println(choice);
@@ -296,14 +389,43 @@ public class GameLogic {
         if(choice == 0){
             state = "player inventory";
         }
-        if(choice == 1){
-            state = "show planet status";
-        }
         return choice;
     }
 
     private void showPlayerInventory(){
-        Jogador.getInventory();
+        List<Item> jogadorInventory = Jogador.getInventory();
+        if(jogadorInventory.toArray().length > 0){
+            System.out.println("Selecione um item");
+            int itemIndex = 0;
+            for (Item item : jogadorInventory) {
+                if(item instanceof Weapon){
+                    jogadorInventory.remove(item);
+                }else{
+                    String itemText;
+                    if(item instanceof UsableItem){
+                        UsableItem usable = (UsableItem) item;
+                        itemText = itemIndex + ": " + usable.getNome() + " x " + usable.getQuantidade();
+                    }else{
+                        itemText = itemIndex + ": " + item.getNome();
+                    }
+                    System.out.println(itemText);
+                    itemIndex ++;
+                }
+            }
+            System.out.println(itemIndex + ": Voltar");
+            int itemInput = scanner.nextIntOrDefault(-1);
+            if(itemInput == -1 || itemInput > jogadorInventory.toArray().length){
+                System.out.println("Ação inválida");
+            }else if(itemInput < jogadorInventory.toArray().length){
+                Item currentItem = jogadorInventory.get(itemInput);
+                if(currentItem instanceof UsableItem && (!(currentItem instanceof DamageItem))){
+                    UsableItem usable = (UsableItem) currentItem;
+                    Jogador.useItem(usable);
+                }else{
+                    Jogador.useItem(currentItem,true);
+                }
+            }
+        }
         state = oldState;
     }
 

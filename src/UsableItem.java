@@ -1,14 +1,14 @@
 public class UsableItem extends Item {
 
-    private int quantidade = 1;
+    private int quantidade = 0; //-(Encapsulamento)
 
     public UsableItem(String itemNome, String itemDesc){
         super(itemNome, itemDesc);
-    }
+    } //-(Método Construtor)
 
     public void setQuantitade(int quantidade){
         this.quantidade = quantidade;
-    }
+    } //-(Herança)
 
     public boolean verifyQuantidade(){
         if(this.quantidade > 0){
@@ -19,18 +19,17 @@ public class UsableItem extends Item {
         }
         System.out.println("Quantidade insuficiente.");
         return false;
-    }
+    } //-(Herança)
     public  int getQuantidade(){
         return this.quantidade;
-    }
+    } //-(Herança)
 
     public boolean use(){
         if(verifyQuantidade()){
             return true;
         }
         return false;
-    }
-
+    } //-(Herança)
 
 
 }
